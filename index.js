@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import multer from "multer";
+import cors from "cors";
 import { loginValidation, registerValidation } from "./validations/auth.js";
 import checkAuth from "./utils/checkAuth.js";
 import * as AuthController from "./controller/AuthController.js";
@@ -28,6 +29,7 @@ const app = express();
 const port = 5000;
 
 app.use(express.json());
+app.use(cors());
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
@@ -55,6 +57,7 @@ app.post(
 );
 app.get("/auth/me", checkAuth, AuthController.getMe);
 
+app.get("/tags", PostController.getLastTags);
 app.get("/posts", PostController.index);
 app.post(
   "/posts",
