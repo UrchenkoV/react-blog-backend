@@ -120,10 +120,7 @@ export const destroy = async (req, res) => {
 export const getLastTags = async (req, res) => {
   try {
     const post = await PostModel.find().exec();
-    const tags = await post
-      .map((obj) => obj.tags)
-      .flat()
-      .slice(0, 5);
+    const tags = await [...new Set(post.map((obj) => obj.tags).flat())];
 
     res.json(tags);
   } catch (error) {
