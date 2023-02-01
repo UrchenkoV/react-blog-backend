@@ -6,7 +6,9 @@ import { loginValidation, registerValidation } from "./validations/auth.js";
 import checkAuth from "./utils/checkAuth.js";
 import * as AuthController from "./controller/AuthController.js";
 import * as PostController from "./controller/PostController.js";
+import * as CommentController from "./controller/CommentController.js";
 import { postCreateValidation } from "./validations/post.js";
+import { commentCreateValidation } from "./validations/comment.js";
 import handleValidation from "./middleware/handleValidation.js";
 
 const storage = multer.diskStorage({
@@ -39,7 +41,6 @@ app.get("/", (req, res) => {
 app.post("/upload", upload.single("image"), (req, res) => {
   res.json({
     url: `/uploads/${req.file.filename}`,
-    file: req.file,
   });
 });
 
@@ -58,6 +59,7 @@ app.post(
 app.get("/auth/me", checkAuth, AuthController.getMe);
 
 app.get("/tags", PostController.getLastTags);
+// Posts
 app.get("/posts", PostController.index);
 app.post(
   "/posts",
@@ -75,6 +77,24 @@ app.patch(
   PostController.update
 );
 app.delete("/posts/:id", checkAuth, PostController.destroy);
+
+// Comments
+app.get("/comments", CommentController.index);
+app.post(
+  "/posts/:id/comment",
+  checkAuth,
+  commentCreateValidation,
+  handleValidation,
+  CommentController.create
+);
+app.patch(
+  "/comments/:id",
+  checkAuth,
+  commentCreateValidation,
+  handleValidation,
+  CommentController.update
+);
+app.patch("/comments/:id", checkAuth, CommentController.destroy);
 
 app.listen(port, (err) => {
   if (err) {

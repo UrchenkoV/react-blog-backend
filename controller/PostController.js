@@ -2,7 +2,11 @@ import PostModel from "../models/Post.js";
 
 export const index = async (req, res) => {
   try {
-    const post = await PostModel.find().populate("user").exec();
+    const sort = req.query.populate;
+    const post = await PostModel.find()
+      .sort(sort && { viewsCount: sort })
+      .populate(["user", "comment"])
+      .exec();
 
     res.json(post);
   } catch (error) {
