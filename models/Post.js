@@ -31,4 +31,20 @@ const PostModel = mongoose.Schema(
   }
 );
 
+PostModel.virtual("comments", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "post",
+});
+
+PostModel.virtual("commentCount", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "post",
+  count: true,
+});
+
+PostModel.set("toObject", { virtuals: true });
+PostModel.set("toJSON", { virtuals: true });
+
 export default mongoose.model("Post", PostModel);

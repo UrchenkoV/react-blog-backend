@@ -1,11 +1,13 @@
 import PostModel from "../models/Post.js";
+import CommentModel from "../models/Comment.js";
 
 export const index = async (req, res) => {
   try {
     const sort = req.query.populate;
     const post = await PostModel.find()
       .sort(sort && { viewsCount: sort })
-      .populate(["user", "comment"])
+      .populate({ path: "commentCount" })
+      .populate({ path: "user", select: "fullName avatar" })
       .exec();
 
     res.json(post);
@@ -27,13 +29,20 @@ export const show = async (req, res) => {
         $inc: { viewsCount: 1 },
       },
       { new: true }
-    ).populate("user");
+    )
+      .populate({ path: "user", select: "fullName avatar" })
+      .populate({ path: "comments" })
+      .populate({ path: "commentCount" });
 
     if (!post) {
       return res.status(404).json({
         message: "Статья не найдена.",
       });
     }
+    console.log(post);
+    const comments = await CommentModel.find({ post: postId })
+      .populate("user")
+      .select("-post");
 
     res.json(post);
   } catch (error) {

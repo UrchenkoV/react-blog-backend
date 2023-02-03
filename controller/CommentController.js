@@ -2,7 +2,11 @@ import CommentModel from "../models/Comment.js";
 
 export const index = async (req, res) => {
   try {
-    const comments = await CommentModel.find().populate("user").limit(5).exec();
+    const comments = await CommentModel.find()
+      .sort({ createdAt: "desc" })
+      .populate("user")
+      .limit(5)
+      .exec();
     //
     res.json(comments);
   } catch (error) {
@@ -16,7 +20,6 @@ export const index = async (req, res) => {
 export const show = () => {};
 
 export const create = async (req, res) => {
-  console.log(req.body, req.userId, req.params);
   try {
     const body = req.body;
 
@@ -25,9 +28,11 @@ export const create = async (req, res) => {
       post: req.params.id,
       text: body.text,
     });
-    comment.save();
 
-    res.json(comment);
+    comment.save(async (err, item) => {
+      const data = await item.populate("user");
+      res.json(data);
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({
