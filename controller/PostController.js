@@ -1,14 +1,28 @@
 import PostModel from "../models/Post.js";
-import CommentModel from "../models/Comment.js";
 
 export const index = async (req, res) => {
   try {
-    const sort = req.query.populate;
-    const post = await PostModel.find()
-      .sort(sort && { viewsCount: sort })
-      .populate({ path: "commentCount" })
-      .populate({ path: "user", select: "fullName avatar" })
-      .exec();
+    const query = req.query;
+    let post = null;
+
+    if (query.populate) {
+      post = await PostModel.find()
+        .sort(query.populate && { viewsCount: query.populate })
+        .populate({ path: "commentCount" })
+        .populate({ path: "user", select: "fullName avatar" })
+        .exec();
+    } else if (query.tag) {
+      post = await PostModel.find()
+        .where("tags", query.tag)
+        .populate({ path: "commentCount" })
+        .populate({ path: "user", select: "fullName avatar" })
+        .exec();
+    } else {
+      post = await PostModel.find()
+        .populate({ path: "commentCount" })
+        .populate({ path: "user", select: "fullName avatar" })
+        .exec();
+    }
 
     res.json(post);
   } catch (error) {
@@ -31,7 +45,7 @@ export const show = async (req, res) => {
       { new: true }
     )
       .populate({ path: "user", select: "fullName avatar" })
-      .populate({ path: "comments" })
+      .populate({ path: "comments", populate: "user" })
       .populate({ path: "commentCount" });
 
     if (!post) {
@@ -39,10 +53,6 @@ export const show = async (req, res) => {
         message: "Статья не найдена.",
       });
     }
-    console.log(post);
-    const comments = await CommentModel.find({ post: postId })
-      .populate("user")
-      .select("-post");
 
     res.json(post);
   } catch (error) {
