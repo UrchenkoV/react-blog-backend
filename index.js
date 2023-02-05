@@ -7,6 +7,7 @@ import checkAuth from "./utils/checkAuth.js";
 import * as AuthController from "./controller/AuthController.js";
 import * as PostController from "./controller/PostController.js";
 import * as CommentController from "./controller/CommentController.js";
+import * as FileController from "./controller/FileController.js";
 import { postCreateValidation } from "./validations/post.js";
 import { commentCreateValidation } from "./validations/comment.js";
 import handleValidation from "./middleware/handleValidation.js";
@@ -77,6 +78,11 @@ app.patch(
   PostController.update
 );
 app.delete("/posts/:id", checkAuth, PostController.destroy);
+app.patch(
+  "/posts/:id/destroy-image",
+  checkAuth,
+  FileController.destroyImageFromPost
+);
 
 // Comments
 app.get("/comments", CommentController.index);

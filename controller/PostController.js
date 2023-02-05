@@ -1,4 +1,5 @@
 import PostModel from "../models/Post.js";
+import fs from "fs";
 
 export const index = async (req, res) => {
   try {
@@ -7,7 +8,7 @@ export const index = async (req, res) => {
 
     if (query.populate) {
       post = await PostModel.find()
-        .sort(query.populate && { viewsCount: query.populate })
+        .sort({ viewsCount: query.populate })
         .populate({ path: "commentCount" })
         .populate({ path: "user", select: "fullName avatar" })
         .exec();
@@ -120,6 +121,7 @@ export const update = async (req, res) => {
 export const destroy = async (req, res) => {
   try {
     const postId = req.params.id;
+    const appDir = process.cwd();
 
     const post = await PostModel.findOneAndDelete({
       _id: postId,
@@ -130,6 +132,10 @@ export const destroy = async (req, res) => {
         message: "Статья не найдена.",
       });
     }
+
+    await fs.unlink(appDir + post.image, (err) => {
+      console.log("Error on delete image post.", err);
+    });
 
     res.json(post);
   } catch (error) {
